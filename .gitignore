@@ -27,3 +27,6 @@ go.work.sum
 /.devenv/
 /.direnv/
 /.pre-commit-config.yaml
+
+# Private configuration
+/.config/

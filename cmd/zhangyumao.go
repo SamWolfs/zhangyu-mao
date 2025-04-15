@@ -8,6 +8,7 @@ import (
 	"ergo.services/ergo"
 	"ergo.services/ergo/gen"
 	"ergo.services/ergo/lib"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -24,6 +25,8 @@ func main() {
 	var options gen.NodeOptions
 
 	flag.Parse()
+
+	viper.AutomaticEnv()
 
 	// create applications that must be started
 	apps := []gen.ApplicationBehavior{
