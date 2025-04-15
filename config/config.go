@@ -5,7 +5,7 @@ import (
 )
 
 type GitHubAppConfig struct {
-	AppId          int
+	AppId          int64
 	PrivateKeyPath string
 	WebhookSecret  string
 }
@@ -15,7 +15,7 @@ var gitHubAppConfig *GitHubAppConfig
 func GetGitHubAppConig() GitHubAppConfig {
 	if gitHubAppConfig == nil {
 		gitHubAppConfig = &GitHubAppConfig{
-			AppId:          viper.GetInt("APP_ID"),
+			AppId:          viper.GetInt64("APP_ID"),
 			PrivateKeyPath: viper.GetString("PRIVATE_KEY_PATH"),
 			WebhookSecret:  viper.GetString("WEBHOOK_SECRET"),
 		}

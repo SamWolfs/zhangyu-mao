@@ -27,6 +27,12 @@ func GetInstallations(g gen.Process) ([]*github.Installation, error) {
 	return installations.([]*github.Installation), err
 }
 
+// GetInstallationClients returns a github.Client for each Installation instance
+func GetInstallationClients(g gen.Process) (map[int64]*github.Client, error) {
+	clients, err := g.Call(alias_AppsClient, "installationClients")
+	return clients.(map[int64]*github.Client), err
+}
+
 // Init invoked on a start this process.
 func (a *AppsClient) Init(args ...any) error {
 	a.Log().Info("started process with name %s and args %v", a.Name(), args)
@@ -64,6 +70,19 @@ func (a *AppsClient) HandleCall(from gen.PID, ref gen.Ref, request any) (any, er
 	case "installations":
 		installations, _, err := a.client.Apps.ListInstallations(context.Background(), nil)
 		return installations, err
+	case "installationClients":
+		installations, _, err := a.client.Apps.ListInstallations(context.Background(), nil)
+		if err != nil {
+			return nil, err
+		}
+		clients := make(map[int64]*github.Client)
+		for _, installation := range installations {
+			client, err := github.NewInstallationClient(a.config, *installation.ID)
+			if err == nil {
+				clients[*installation.ID] = client
+			}
+		}
+		return clients, err
 	}
 
 	return gen.Atom("pong"), nil
