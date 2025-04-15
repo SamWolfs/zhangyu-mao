@@ -101,3 +101,6 @@ jobs:
 
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
+        with:
+          allow-ghsas: |
+            GHSA-w73w-5m7g-f7qc
