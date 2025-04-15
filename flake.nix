@@ -24,13 +24,15 @@
             };
 
             pre-commit.hooks = {
+              actionlint.enable = true;
               nixpkgs-fmt.enable = true;
               yamllint.enable = true;
             };
 
             packages = with pkgs; [
-              gnumake
+              gosmee
 
+              actionlint
               golangci-lint
               yamllint
             ];
@@ -39,6 +41,10 @@
               versions.exec = ''
                 go version
                 golangci-lint version
+                actionlint version
+              '';
+              smee-proxy.exec = ''
+                smee -u "$WEBHOOK_PROXY_URL"
               '';
             };
 

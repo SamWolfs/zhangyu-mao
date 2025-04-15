@@ -8,6 +8,8 @@ import (
 	"ergo.services/ergo/meta"
 )
 
+var alias_Handler = gen.Atom("handler")
+
 func factory_Handler() gen.ProcessBehavior {
 	return &Handler{}
 }
@@ -36,7 +38,7 @@ func (w *Handler) Init(args ...any) (act.PoolOptions, error) {
 	mux.Handle("/", root)
 	w.Log().Info("started WebHandler to serve '/' (meta-process: %s)", rootid)
 
-	webOptions.Port = 9090
+	webOptions.Port = 3000
 	webOptions.Host = "localhost"
 
 	webOptions.Handler = mux
