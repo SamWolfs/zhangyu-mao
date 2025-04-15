@@ -31,6 +31,7 @@
             packages = with pkgs; [
               gnumake
 
+              gosmee
               golangci-lint
               yamllint
             ];
@@ -39,6 +40,9 @@
               versions.exec = ''
                 go version
                 golangci-lint version
+              '';
+              smee-proxy.exec = ''
+                smee -u "$WEBHOOK_PROXY_URL"
               '';
             };
 

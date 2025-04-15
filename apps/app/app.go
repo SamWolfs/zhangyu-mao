@@ -18,7 +18,11 @@ func (app *App) Load(node gen.Node, args ...any) (gen.ApplicationSpec, error) {
 		Mode:        gen.ApplicationModeTransient,
 		Group: []gen.ApplicationMemberSpec{
 			{
-				Name:    "handler",
+				Name:    alias_AppsClient,
+				Factory: factory_AppsClient,
+			},
+			{
+				Name:    alias_Handler,
 				Factory: factory_Handler,
 			},
 		},

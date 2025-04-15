@@ -3,9 +3,10 @@ package app
 import (
 	"bytes"
 	"encoding/json"
+	"net/http"
+
 	"ergo.services/ergo/act"
 	"ergo.services/ergo/gen"
-	"net/http"
 )
 
 func factory_HandlerWebWorker() gen.ProcessBehavior {
@@ -26,6 +27,20 @@ func (w *HandlerWebWorker) Init(args ...any) error {
 // you need to add the accoring callback-method implementation. See act.WebWorkerBehavior.
 
 func (w *HandlerWebWorker) HandleGet(from gen.PID, writer http.ResponseWriter, request *http.Request) error {
+	var buf bytes.Buffer
+
+	w.Log().Info("got HTTP request %q", request.URL.Path)
+	writer.Header().Set("Content-Type", "application/json")
+	// response JSON message with information about this process
+	info, _ := w.Info()
+	enc := json.NewEncoder(&buf)
+	enc.SetEscapeHTML(false)
+	enc.Encode(info)
+	writer.Write(buf.Bytes())
+	return nil
+}
+
+func (w *HandlerWebWorker) HandlePost(from gen.PID, writer http.ResponseWriter, request *http.Request) error {
 	var buf bytes.Buffer
 
 	w.Log().Info("got HTTP request %q", request.URL.Path)
