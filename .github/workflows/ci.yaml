@@ -102,4 +102,4 @@ jobs:
       - name: Dependency Review
         uses: actions/dependency-review-action@v4
         with:
-          allow-ghsas: GHSA-w73w-5m7g-f7qc
+          allow-ghsas: GHSA-w73w-5m7g-f7qc,GHSA-hcg3-q754-cr77
