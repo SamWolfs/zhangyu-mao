@@ -35,8 +35,10 @@ func (w *HandlerWebWorker) HandleGet(from gen.PID, writer http.ResponseWriter, r
 	info, _ := w.Info()
 	enc := json.NewEncoder(&buf)
 	enc.SetEscapeHTML(false)
-	enc.Encode(info)
-	writer.Write(buf.Bytes())
+	err := enc.Encode(info)
+	checkError(err)
+	_, err = writer.Write(buf.Bytes())
+	checkError(err)
 	return nil
 }
 
@@ -49,7 +51,13 @@ func (w *HandlerWebWorker) HandlePost(from gen.PID, writer http.ResponseWriter, 
 	info, _ := w.Info()
 	enc := json.NewEncoder(&buf)
 	enc.SetEscapeHTML(false)
-	enc.Encode(info)
-	writer.Write(buf.Bytes())
+	err := enc.Encode(info)
+	checkError(err)
+	_, err = writer.Write(buf.Bytes())
+	checkError(err)
 	return nil
+}
+
+func checkError(err error) {
+
 }

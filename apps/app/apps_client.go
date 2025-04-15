@@ -30,8 +30,7 @@ func GetInstallations(g gen.Process) ([]*github.Installation, error) {
 // Init invoked on a start this process.
 func (a *AppsClient) Init(args ...any) error {
 	a.Log().Info("started process with name %s and args %v", a.Name(), args)
-	a.Send(a.PID(), "init")
-	return nil
+	return a.Send(a.PID(), "init")
 }
 
 //
