@@ -30,11 +30,16 @@ func (w *Handler) Init(args ...any) (act.PoolOptions, error) {
 	var webOptions meta.WebServerOptions
 	var poolOptions act.PoolOptions
 
+	initError := fmt.Errorf("unable to start Handler. Expected Args to be of type []HandlerWorkerInitArgs, got: %v", args)
+	if len(args) < 1 {
+		return poolOptions, initError
+	}
+
 	switch initArgs := args[0].(type) {
 	case HandlerInitArgs:
 		w.clientCreator = initArgs.ClientCreator
 	default:
-		return poolOptions, fmt.Errorf("unable to start Handler. Expected Args to be of type []HandlerInitArgs, got: %+v", args)
+		return poolOptions, initError
 	}
 
 	mux := http.NewServeMux()
@@ -53,7 +58,7 @@ func (w *Handler) Init(args ...any) (act.PoolOptions, error) {
 	w.Log().Info("started WebHandler to serve '/' (meta-process: %s)", rootid)
 
 	webOptions.Port = 3000
-	webOptions.Host = "localhost"
+	webOptions.Host = "0.0.0.0"
 
 	webOptions.Handler = mux
 
