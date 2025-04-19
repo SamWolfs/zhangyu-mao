@@ -77,9 +77,3 @@ func (w *HandlerWebWorker) HandlePost(from gen.PID, writer http.ResponseWriter, 
 
 	return nil
 }
-
-func checkError(err error) {
-	if err != nil {
-		fmt.Printf("%+v\n", err)
-	}
-}
