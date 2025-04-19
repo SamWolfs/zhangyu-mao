@@ -8,8 +8,32 @@ import (
 	"github.com/google/go-github/v71/github"
 )
 
-type Client = github.Client
+// TODO: Consider turning this into a ClientCreator/ClientFactory interface
+// which should(?) allow mocking of the github Clients in e.g. GenServers
+type Client struct {
+	github.Client
+
+	Autolinks *AutolinksService
+}
 type Installation = github.Installation
+type ClientCreator interface {
+	NewAppClient() (*Client, error)
+	NewInstallationClient(int64) (*Client, error)
+}
+
+type PushEvent = github.PushEvent
+
+func NewClientCreator(c config.GitHubAppConfig) clientCreator {
+	return clientCreator{
+		config: c,
+	}
+}
+
+type clientCreator struct {
+	config config.GitHubAppConfig
+}
+
+var _ ClientCreator = &clientCreator{}
 
 // Descriptions partially copied from
 // [palantor/go-githubapp](https://github.com/palantir/go-githubapp/blob/develop/githubapp/client_creator.go)
@@ -26,15 +50,18 @@ type Installation = github.Installation
 // Tips for determining the arguments for this function:
 //   - the integration ID is listed as "ID" in the "About" section of the app's page
 //   - the key bytes must be a PEM-encoded PKCS1 or PKCS8 private key for the application
-func NewAppsClient(config config.GitHubAppConfig) (*Client, error) {
+func (c *clientCreator) NewAppClient() (*Client, error) {
 	tr := http.DefaultTransport
 
-	itr, err := ghinstallation.NewAppsTransportKeyFromFile(tr, config.AppId, config.PrivateKeyPath)
+	itr, err := ghinstallation.NewAppsTransportKeyFromFile(tr, c.config.AppId, c.config.PrivateKeyPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return github.NewClient(&http.Client{Transport: itr}), nil
+	client := &Client{Client: *github.NewClient(&http.Client{Transport: itr})}
+	client.initialize()
+
+	return client, nil
 }
 
 // NewInstallationClient returns a new github.Client that performs app authentication for
@@ -42,17 +69,24 @@ func NewAppsClient(config config.GitHubAppConfig) (*Client, error) {
 // The client can be used to perform all operations that the GitHub App is configured for.
 //
 // Tips for determining the arguments for this function:
-//  * the integration ID is listed as "ID" in the "About" section of the app's page
-//  * the installation ID is the ID that is shown in the URL of https://{githubURL}/settings/installations/{#}
-//      (navigate to the "installations" page without the # and go to the app's page to see the number)
-//  * the key bytes must be a PEM-encoded PKCS1 or PKCS8 private key for the application
-func NewInstallationClient(config config.GitHubAppConfig, installationID int64) (*Client, error) {
+//   - the integration ID is listed as "ID" in the "About" section of the app's page
+//   - the installation ID is the ID that is shown in the URL of https://{githubURL}/settings/installations/{#}
+//     (navigate to the "installations" page without the # and go to the app's page to see the number)
+//   - the key bytes must be a PEM-encoded PKCS1 or PKCS8 private key for the application
+func (c *clientCreator) NewInstallationClient(installationID int64) (*Client, error) {
 	tr := http.DefaultTransport
 
-	itr, err := ghinstallation.NewKeyFromFile(tr, config.AppId, installationID, config.PrivateKeyPath)
+	itr, err := ghinstallation.NewKeyFromFile(tr, c.config.AppId, installationID, c.config.PrivateKeyPath)
 	if err != nil {
 		return nil, err
 	}
 
-	return github.NewClient(&http.Client{Transport: itr}), nil
+	client := &Client{Client: *github.NewClient(&http.Client{Transport: itr})}
+	client.initialize()
+
+	return client, nil
+}
+
+func (c *Client) initialize() {
+	c.Autolinks = &AutolinksService{Client: &c.Client}
 }

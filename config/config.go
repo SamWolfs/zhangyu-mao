@@ -12,7 +12,7 @@ type GitHubAppConfig struct {
 
 var gitHubAppConfig *GitHubAppConfig
 
-func GetGitHubAppConig() GitHubAppConfig {
+func GetGitHubAppConfig() GitHubAppConfig {
 	if gitHubAppConfig == nil {
 		gitHubAppConfig = &GitHubAppConfig{
 			AppId:          viper.GetInt64("APP_ID"),
