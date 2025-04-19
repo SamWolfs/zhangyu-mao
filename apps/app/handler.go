@@ -1,7 +1,9 @@
 package app
 
 import (
+	"fmt"
 	"net/http"
+	"zhangyumao/internal/github"
 
 	"ergo.services/ergo/act"
 	"ergo.services/ergo/gen"
@@ -14,14 +16,26 @@ func factory_Handler() gen.ProcessBehavior {
 	return &Handler{}
 }
 
+type HandlerInitArgs struct {
+	ClientCreator github.ClientCreator
+}
+
 type Handler struct {
 	act.Pool
+	clientCreator github.ClientCreator
 }
 
 // Init invoked on a start this process.
 func (w *Handler) Init(args ...any) (act.PoolOptions, error) {
 	var webOptions meta.WebServerOptions
 	var poolOptions act.PoolOptions
+
+	switch initArgs := args[0].(type) {
+	case HandlerInitArgs:
+		w.clientCreator = initArgs.ClientCreator
+	default:
+		return poolOptions, fmt.Errorf("unable to start Handler. Expected Args to be of type []HandlerInitArgs, got: %+v", args)
+	}
 
 	mux := http.NewServeMux()
 
@@ -64,5 +78,8 @@ func (w *Handler) Init(args ...any) (act.PoolOptions, error) {
 	w.Log().Info("   $ curl -k %s://%s:%d", https, webOptions.Host, webOptions.Port)
 
 	poolOptions.WorkerFactory = factory_HandlerWebWorker
+	poolOptions.WorkerArgs = []any{
+		HandlerWorkerInitArgs{ClientCreator: w.clientCreator},
+	}
 	return poolOptions, nil
 }
